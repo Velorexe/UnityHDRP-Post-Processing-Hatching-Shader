@@ -1,4 +1,4 @@
-﻿Shader "Hidden/Shader/ColorMaskPostProcessing"
+﻿Shader "Hidden/Shader/HatchingPostProcessingEffect"
 {
     HLSLINCLUDE
 
@@ -33,15 +33,9 @@
         UNITY_VERTEX_OUTPUT_STEREO
     };
 
-    // List of properties to control your post process effect
-    TEXTURE2D(_ColoringMask);
-
     TEXTURE2D_X(_CameraRender);
 
     TEXTURE2D_SAMPLER2D(_Strokes, sampler_Strokes);
-    // TEXTURE2D_SAMPLER2D(_DarkHatching, sampler_DarkHatching);
-
-    //TEXTURE2D(_Strokes);
 
     Matrix _InverseProjectionMatrix;
     Matrix _ViewToWorldMatrix;
@@ -51,13 +45,11 @@
 
     Matrix clipToWorld;
 
-    float _MaskTolerance;
-
-    float4 _MaskColor;
-
     float2 _Brightness = float2(0, 1);
 
     float4 _Params = float4(1, 0, 1, 1);
+
+    float _Intensity = 1;
 
     Varyings Vert(Attributes input)
     {
@@ -126,7 +118,6 @@
         float2 uvY = worldUV.xz;
         float2 uvZ = worldUV.xy;
 
-        float3 maskValue = LOAD_TEXTURE2D(_ColoringMask ,positionSS);
         float3 screenColor = LOAD_TEXTURE2D_X(_CameraRender, positionSS).rgb;
 
         float luminance = SRGBToLinear(Luminance(screenColor)).r;
@@ -139,9 +130,8 @@
         hatch = saturate(hatch);
         
         float3 col = Blend(Luminance(screenColor.rgb), hatch.rgb, luminance);
-        float3 finalColor = length(abs(maskValue.rgb - _MaskColor.rgb)) < _MaskTolerance ? screenColor : col;
 
-        return float4(finalColor, 1);
+        return float4(lerp(screenColor, col, _Intensity), 1);
     }
 
     ENDHLSL

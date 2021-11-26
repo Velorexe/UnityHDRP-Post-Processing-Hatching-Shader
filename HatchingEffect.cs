@@ -5,8 +5,8 @@ using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Rendering;
 using System;
 
-[Serializable, VolumeComponentMenu("Post-processing/Custom/ColorMask")]
-public sealed class ColorMaskEffect : CustomPostProcessVolumeComponent, IPostProcessComponent
+[Serializable, VolumeComponentMenu("Post-processing/Custom/Hatching Effect")]
+public sealed class HatchingEffect : CustomPostProcessVolumeComponent, IPostProcessComponent
 {
     Material m_Material;
 
@@ -14,12 +14,7 @@ public sealed class ColorMaskEffect : CustomPostProcessVolumeComponent, IPostPro
 
     public BoolParameter Active = new BoolParameter(false);
 
-    public TextureParameter ColoringMask = new TextureParameter(null);
-
     public TextureParameter Strokes = new TextureParameter(null);
-
-    public FloatParameter MaskTolerance = new FloatParameter(0.1f);
-    public ColorParameter MaskColor = new ColorParameter(new Color(1f, 0f, 1f));
 
     [Range(0f, 1f)]
     public FloatParameter Intensity = new FloatParameter(1f);
@@ -32,7 +27,7 @@ public sealed class ColorMaskEffect : CustomPostProcessVolumeComponent, IPostPro
 
     public override void Setup()
     {
-        Shader colorMask = Shader.Find("Hidden/Shader/ColorMaskPostProcessing");
+        Shader colorMask = Shader.Find("Hidden/Shader/HatchingPostProcessing");
         if (colorMask != null) m_Material = new Material(colorMask);
     }
 
@@ -58,10 +53,7 @@ public sealed class ColorMaskEffect : CustomPostProcessVolumeComponent, IPostPro
         m_Material.SetVector("_Params", new Vector4(0, 1, Intensity.value, Tiling.value));
         m_Material.SetVector("_Brightness", Brightness.value);
 
-        m_Material.SetTexture("_ColoringMask", ColoringMask.value);
-        
-        m_Material.SetFloat("_MaskTolerance", MaskTolerance.value);
-        m_Material.SetColor("_MaskColor", MaskColor.value);
+        m_Material.SetFloat("_Intensity", Intensity.value);
 
         HDUtils.DrawFullScreen(cmd, m_Material, destination);
     }
